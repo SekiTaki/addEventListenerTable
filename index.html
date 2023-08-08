@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>动态新增资料栏位的表格</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+    }
+    
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <input type="text" id="dataInput" placeholder="输入资料" onkeydown="handleKeyPress(event)">
+  <button onclick="addData()">新增资料</button>
+  
+  <table id="myTable">
+    <thead>
+      <tr>
+        <th></th>
+        <th>日期和時間</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr></tr>
+      <!-- 以下继续添加资料行 -->
+    </tbody>
+  </table>
+  <div id="time"></div>
+
+  <script>
+    function addData() {
+      var table = document.getElementById("myTable");
+      var tableBody = document.getElementById("tableBody");
+      var dataInput = document.getElementById("dataInput");
+      var newRow = document.createElement("tr");
+      
+      var currentDate = new Date();
+      var datetime = currentDate.toLocaleString();
+      
+      var newData = document.createElement("td");
+      newData.textContent = dataInput.value;
+      newRow.appendChild(newData);
+
+      var newDatetime = document.createElement("td");
+      newDatetime.textContent = datetime;
+      newRow.appendChild(newDatetime);
+
+      tableBody.appendChild(newRow);
+      
+      dataInput.value = ""; // 清空输入框
+      
+      saveDataToLocalStorage(); // 保存数据到本地存储
+    }
+
+    function handleKeyPress(event) {
+      if (event.keyCode === 13) {
+        addData();
+      }
+    }
+
+    function saveDataToLocalStorage() {
+      var table = document.getElementById("myTable");
+      var tableBody = table.getElementsByTagName("tbody")[0];
+      var rows = tableBody.getElementsByTagName("tr");
+      var data = [];
+
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        var rowData = [];
+
+        for (var j = 0; j < cells.length; j++) {
+          rowData.push(cells[j].textContent);
+        }
+
+        data.push(rowData);
+      }
+
+      localStorage.setItem("tableData", JSON.stringify(data));
+    }
+
+    function loadDataFromLocalStorage() {
+      var table = document.getElementById("myTable");
+      var tableBody = table.getElementsByTagName("tbody")[0];
+      var storedData = localStorage.getItem("tableData");
+
+      if (storedData) {
+        var data = JSON.parse(storedData);
+
+        for (var i = 0; i < data.length; i++) {
+          var rowData = data[i];
+          var newRow = document.createElement("tr");
+
+          for (var j = 0; j < rowData.length; j++) {
+            var newData = document.createElement("td");
+            newData.textContent = rowData[j];
+            newRow.appendChild(newData);
+          }
+
+          tableBody.appendChild(newRow);
+        }
+      }
+    }
+
+    loadDataFromLocalStorage(); // 加载数据到表格
+  </script>
+  <script>
+    function displayTime() {
+      var currentTime = new Date();
+      var hours = currentTime.getHours();
+      var minutes = currentTime.getMinutes();
+      var seconds = currentTime.getSeconds();
+      var timeString = hours + ":" + minutes + ":" + seconds;
+
+      document.getElementById("time").innerHTML = timeString;
+    }
+
+    window.onload = function () {
+      // 每秒更新时间
+      setInterval(displayTime, 1000);
+    };
+  </script>
+</body>
+</html>
